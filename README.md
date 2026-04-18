@@ -1,103 +1,58 @@
-# Stock Market Prediction Using Deep Learning and Time Series Models
+# 📈 Stock Price Forecasting System (Final Submission)
 
-## Progress of Week 8
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Status](https://img.shields.io/badge/Status-Cleaned%20Final%20Version-success.svg)]()
+[![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37626.svg)](https://jupyter.org/)
 
-## Overview
-This project focuses on predicting stock market behavior using both traditional time-series forecasting and deep learning models. The notebook includes data collection, preprocessing, exploratory data analysis, feature engineering, sequence preparation, model development, and evaluation. The main goal is to compare how well models such as ARIMA, LSTM, and GRU can learn patterns from historical stock market data and generate useful predictions.
+This repository contains a robust machine learning pipeline designed to forecast stock price behavior by integrating historical market data with financial sentiment analysis.
 
-## Project Objectives
-- Collect historical stock market data for selected companies.
-- Preprocess and clean the dataset for analysis.
-- Perform exploratory data analysis to understand trends, volatility, and return behavior.
-- Build forecasting models using both statistical and deep learning approaches.
-- Compare model outputs using visualizations and prediction results.
-- Identify current model limitations and explore possible future improvements.
+## 📑 Table of Contents
+- [Overview](#-overview)
+- [Key Improvements (Week 8)](#-key-improvements-week-8)
+- [Project Objectives](#-project-objectives)
+- [Methodology](#-methodology)
+- [Models & Architecture](#-models--architecture)
+- [Requirements](#-requirements)
+- [Usage](#-usage)
 
-## Dataset
-The project uses historical stock market data collected through the `yfinance` library. The selected companies in this notebook are:
+## 📖 Overview
+The project focuses on predicting stock market movements for major tech symbols (AAPL, MSFT, GOOGL, AMZN, NVDA). It goes beyond basic price prediction by incorporating sentiment analysis from financial news and evaluating models based on their ability to predict the *direction* of market movement.
 
-- AAPL
-- MSFT
-- GOOGL
-- AMZN
-- NVDA
+## ✨ Key Improvements (Week 8)
+This version (`main-8-fixed.ipynb`) includes critical updates to ensure academic and functional rigor:
+- **Data Integrity Fix:** Resolved sentiment-scaler leakage to ensure completely blind out-of-sample testing.
+- **Directional Accuracy:** Integrated metrics to track how often the model correctly predicts the "up" or "down" movement.
+- **Naive Baseline:** Added a naive benchmark (Persistence model) to verify the predictive alpha of the ML/DL models.
+- **Consolidated Selection:** Automated the selection of the "Best Model" per symbol using a weighted scoring system (MAE, RMSE, and Directional Accuracy).
+- **Zero-Sentiment Coverage:** Validated model stability during periods with no available news sentiment.
 
-The dataset includes stock information such as closing price and derived indicators like daily returns, log returns, volatility, momentum, and moving averages.
+## 🎯 Project Objectives
+* **Preprocess & Clean:** Handle highly volatile financial datasets and align them with sentiment scores.
+* **Feature Engineering:** Generate technical indicators (Volatility, Momentum, EMA) without forward-looking bias.
+* **Model Comparison:** Rigorously test Statistical (ARIMA) vs. Deep Learning (LSTM, GRU) approaches.
+* **Performance Optimization:** Use a scoring framework to rank models dynamically.
 
-## Workflow
-The notebook follows these major steps:
+## 🧠 Methodology
+1. **Data Collection:** Automated fetching of historical data via `yfinance`.
+2. **Sentiment Analysis:** Processing news text using `vaderSentiment` and `textblob`.
+3. **Sequence Preparation:** Creating sliding window sequences for RNN-based models.
+4. **Scoring & Selection:** Models are ranked by a final score that balances error magnitude (MAE/RMSE) and directional hits.
 
-1. **Data Collection**  
-   Historical stock price data is downloaded for multiple companies using `yfinance`.
+## 🤖 Models & Architecture
+- **ARIMA:** A statistical baseline for time-series forecasting.
+- **LSTM (Long Short-Term Memory):** Designed to capture long-term dependencies in sequential data.
+- **GRU (Gated Recurrent Unit):** An efficient, simplified RNN architecture for time-series patterns.
+- **Naive Baseline:** The "Yesterday-is-Today" benchmark to ensure model value.
 
-2. **Data Preprocessing**  
-   The data is cleaned, missing values are handled, and target variables are created for forecasting.
+## 🛠 Requirements
+The following libraries are required: `matplotlib`, `numpy`, `pandas`, `requests`, `sklearn`, `statsmodels`, `tensorflow`, `textblob`, `vaderSentiment`, `yfinance`
 
-3. **Exploratory Data Analysis**  
-   Visualizations are created to study stock closing price trends, return distributions, volatility, moving averages, and cumulative returns.
+## 🚀 Usage
+1. Open `main-8-fixed.ipynb` in a Jupyter environment or Google Colab.
+2. Ensure all dependencies are installed.
+3. **Run All Cells:** The notebook is designed to execute from top-to-bottom.
+4. **Review Results:** The final cell generates the `best_models_df`, which displays the top model, feature set, and accuracy score for each stock symbol.
 
-4. **Feature Engineering**  
-   Additional features such as log returns, rolling volatility, momentum, and exponential moving averages are generated to improve model learning.
-
-5. **Sequence Preparation**  
-   Time-series sequences are created for deep learning models so that historical observations can be used to predict future values.
-
-6. **Model Development**  
-   Different forecasting models are built, including ARIMA, LSTM, and GRU.
-
-7. **Model Evaluation**  
-   Predicted values are compared with actual values using visualizations and performance observations.
-
-## Models Used
-- **ARIMA (AutoRegressive Integrated Moving Average)**  
-  A traditional statistical time-series forecasting model used as a baseline or comparison approach.
-
-- **LSTM (Long Short-Term Memory)**  
-  A deep learning model designed for sequential and time-series data.
-
-- **GRU (Gated Recurrent Unit)**  
-  A recurrent neural network model similar to LSTM but with a simpler architecture.
-
-## Results
-The project shows that the models are able to capture the overall trend or average movement of the target variable to some extent. However, the predictions are smoother than the actual values, which suggests that the current models are not yet capturing short-term market fluctuations effectively. This indicates that more feature engineering, tuning, or external information may be needed to improve prediction quality.
-
-## Challenges
-Some of the key challenges faced during the project include:
-- Preparing time-series data correctly for forecasting models.
-- Managing train, validation, and test splits properly.
-- Handling noisy and highly volatile stock market behavior.
-- Interpreting why predictions remain smoother than actual values.
-- Identifying whether performance limitations come from the data, features, or model choice.
-
-## Future Improvements
-Possible future enhancements for this project include:
-- Adding sentiment analysis using financial news or social media data.
-- Improving feature engineering with more technical indicators.
-- Tuning model hyperparameters for better performance.
-- Comparing additional forecasting models.
-- Evaluating results using more performance metrics and baseline comparisons.
-
-## Requirements
-The project uses the following Python libraries:
-
-- pandas
-- numpy
-- matplotlib
-- yfinance
-- scikit-learn
-- tensorflow
-- statsmodels
-
-## How to Run
-1. Open the notebook in Jupyter Notebook or Google Colab.
-2. Install the required libraries if they are not already installed.
-3. Run the notebook cells in order from top to bottom.
-4. Review the generated plots, model outputs, and final prediction comparison.
-
-## File Structure
-- `main.ipynb` — Updated and modified notebook
-- `README.md` — Project description and usage guide
-
-## Authors
-- Palden
-- Sagar
+---
+**Authors:** Palden & Sagar  
+**Version:** 8.0 (Fixed & Consolidated)

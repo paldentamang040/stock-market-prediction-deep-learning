@@ -1,7 +1,10 @@
-pandas==3.0.1
-numpy==2.4.0
-matplotlib==3.10.8
-yfinance==1.2.0
-scikit-learn==1.7.2
-tensorflow==2.21.0
-statsmodels==0.14.6
+matplotlib
+numpy
+pandas
+requests
+scikit-learn
+statsmodels
+tensorflow
+textblob
+vaderSentiment
+yfinance
