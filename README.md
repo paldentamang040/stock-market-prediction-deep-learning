@@ -1,58 +1,74 @@
-# 📈 Stock Price Forecasting System (Final Submission)
+# 📈 Stock Price Forecasting System
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
-[![Status](https://img.shields.io/badge/Status-Cleaned%20Final%20Version-success.svg)]()
+[![Status](https://img.shields.io/badge/Status-Final%20Version-success.svg)]()
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37626.svg)](https://jupyter.org/)
 
-This repository contains a robust machine learning pipeline designed to forecast stock price behavior by integrating historical market data with financial sentiment analysis.
+This repository contains a machine learning pipeline that forecasts daily stock return direction by combining historical market data with financial news sentiment. Models are evaluated on both error magnitude and directional accuracy against a naive baseline.
 
 ## 📑 Table of Contents
 - [Overview](#-overview)
-- [Key Improvements (Week 8)](#-key-improvements-week-8)
 - [Project Objectives](#-project-objectives)
 - [Methodology](#-methodology)
 - [Models & Architecture](#-models--architecture)
+- [Evaluation](#-evaluation)
 - [Requirements](#-requirements)
 - [Usage](#-usage)
 
 ## 📖 Overview
-The project focuses on predicting stock market movements for major tech symbols (AAPL, MSFT, GOOGL, AMZN, NVDA). It goes beyond basic price prediction by incorporating sentiment analysis from financial news and evaluating models based on their ability to predict the *direction* of market movement.
-
-## ✨ Key Improvements (Week 8)
-This version (`main-8-fixed.ipynb`) includes critical updates to ensure academic and functional rigor:
-- **Data Integrity Fix:** Resolved sentiment-scaler leakage to ensure completely blind out-of-sample testing.
-- **Directional Accuracy:** Integrated metrics to track how often the model correctly predicts the "up" or "down" movement.
-- **Naive Baseline:** Added a naive benchmark (Persistence model) to verify the predictive alpha of the ML/DL models.
-- **Consolidated Selection:** Automated the selection of the "Best Model" per symbol using a weighted scoring system (MAE, RMSE, and Directional Accuracy).
-- **Zero-Sentiment Coverage:** Validated model stability during periods with no available news sentiment.
+The project predicts next-day **returns** (not raw prices) for five major tech stocks: AAPL, MSFT, GOOGL, AMZN, and NVDA. Sentiment scores from the Marketaux financial news API are incorporated as lagged features alongside price and return history, ensuring no future information leaks into training.
 
 ## 🎯 Project Objectives
-* **Preprocess & Clean:** Handle highly volatile financial datasets and align them with sentiment scores.
-* **Feature Engineering:** Generate technical indicators (Volatility, Momentum, EMA) without forward-looking bias.
-* **Model Comparison:** Rigorously test Statistical (ARIMA) vs. Deep Learning (LSTM, GRU) approaches.
-* **Performance Optimization:** Use a scoring framework to rank models dynamically.
+- **Predict return direction** — frame the task as return forecasting rather than price level forecasting, making the naive baseline harder to beat
+- **Leakage-free pipeline** — fit all scalers on training data only, apply to validation and test
+- **Sentiment integration** — align lagged Marketaux sentiment scores to trading days without look-ahead bias
+- **Fair model comparison** — compare LSTM and GRU against a zero-return naive baseline using consistent train/val/test splits across all symbols
 
 ## 🧠 Methodology
-1. **Data Collection:** Automated fetching of historical data via `yfinance`.
-2. **Sentiment Analysis:** Processing news text using `vaderSentiment` and `textblob`.
-3. **Sequence Preparation:** Creating sliding window sequences for RNN-based models.
-4. **Scoring & Selection:** Models are ranked by a final score that balances error magnitude (MAE/RMSE) and directional hits.
+1. **Data collection** — historical OHLCV data fetched via `yfinance` (2-year window, daily interval)
+2. **Sentiment pipeline** — financial news fetched from Marketaux API, entity-level sentiment scores aggregated daily, lagged by 1 day, and smoothed with a 5-day rolling mean (`sentiment_ma_5`) to avoid leakage
+3. **Feature engineering** — features used: `Close`, `returns`, `sentiment_ma_5`
+4. **Sequence preparation** — sliding window sequences (window = 60 days) created for LSTM and GRU inputs
+5. **Leakage-free scaling** — `MinMaxScaler` fit on training split only, transformed on val/test
+6. **Scoring & selection** — models ranked per symbol using a weighted score: 45% RMSE, 35% MAE, 20% directional accuracy (inverted)
 
 ## 🤖 Models & Architecture
-- **ARIMA:** A statistical baseline for time-series forecasting.
-- **LSTM (Long Short-Term Memory):** Designed to capture long-term dependencies in sequential data.
-- **GRU (Gated Recurrent Unit):** An efficient, simplified RNN architecture for time-series patterns.
-- **Naive Baseline:** The "Yesterday-is-Today" benchmark to ensure model value.
+
+| Model | Architecture | Notes |
+|---|---|---|
+| **ARIMA** | Grid search over 5 orders, best selected on val RMSE | Statistical baseline on price levels |
+| **LSTM** | `LSTM(50) → Dropout(0.3) → Dense(1)` | Trained on returns with early stopping (patience=10) |
+| **GRU** | `GRU(50) → Dropout(0.3) → Dense(1)` | Same architecture and training setup as LSTM |
+| **Naive baseline** | Predict zero return every day | Random walk assumption — DA reflects how often the market actually moves up |
+
+## 📊 Evaluation
+Three metrics are reported for every model and symbol:
+
+- **MAE** — mean absolute error on predicted returns
+- **RMSE** — root mean squared error on predicted returns
+- **Directional accuracy (DA)** — percentage of days where the model correctly predicts up vs. down movement
+
+Directional accuracy is the primary metric of interest for trading relevance. The naive baseline (zero return) sets the floor — any model beating it on DA is providing genuine signal.
 
 ## 🛠 Requirements
-The following libraries are required: `matplotlib`, `numpy`, `pandas`, `requests`, `sklearn`, `statsmodels`, `tensorflow`, `textblob`, `vaderSentiment`, `yfinance`
+```
+matplotlib
+numpy
+pandas
+requests
+scikit-learn
+statsmodels
+tensorflow
+yfinance
+```
+
+Install all dependencies by running the first cell of the notebook, which handles installs automatically.
 
 ## 🚀 Usage
-1. Open `main-8-fixed.ipynb` in a Jupyter environment or Google Colab.
-2. Ensure all dependencies are installed.
-3. **Run All Cells:** The notebook is designed to execute from top-to-bottom.
-4. **Review Results:** The final cell generates the `best_models_df`, which displays the top model, feature set, and accuracy score for each stock symbol.
+1. Open `main.ipynb` in Jupyter or Google Colab
+2. Add your Marketaux API key to the `MARKETAUX_API_KEY` variable in Section 4
+3. **Run all cells top-to-bottom** — the notebook is fully sequential with no hidden state dependencies
+4. Final outputs are in **Section 8** (consolidated comparison table) and **Section 9** (best model per symbol)
 
 ---
-**Authors:** Palden & Sagar  
-**Version:** 8.0 (Fixed & Consolidated)
+**Authors:** Palden & Sagar
